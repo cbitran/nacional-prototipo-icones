@@ -273,8 +273,12 @@
   .aside.b2{width:257px;gap:4px;padding:0 0 16px;border-radius:8px;background:rgb(var(--m900));overflow:hidden;font-family:Outfit,system-ui,sans-serif}
   .b2 .cards, .b2 .lnks{display:flex;gap:4px}
   .b2 .card{flex:1;position:relative;height:59px;border-radius:8px;background:rgb(var(--p900));overflow:hidden}
-  .b2 .card .t{position:relative;z-index:1;display:block;width:45px;padding:12px;font-size:10px;font-weight:600;line-height:1.2;color:rgb(var(--m200))}
-  .b2 .card .slot{position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:60px;height:54px;font-size:40px;color:rgb(var(--p200))}
+  /* medido no site: bloco w-[45px] p-3 flex-col justify-center items-start; o texto (10px/12px 600) se ajusta à palavra mais longa */
+  .b2 .card .t{position:relative;z-index:1;width:45px;height:100%;padding:12px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+  .b2 .card .t span{font-size:10px;font-weight:600;line-height:12px;color:rgb(var(--m200))}
+  /* imagem: absolute -right-1, centralizada, h-[54px] w-auto (inteira, sem corte) */
+  .b2 .card .slot{position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:auto;height:54px;font-size:40px;color:rgb(var(--p200))}
+  .b2 .card .slot img{width:auto;height:100%}
   .b2 .lnk{flex:1;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:4px;border:1px solid rgb(var(--p500));background:rgb(var(--p700));color:rgb(var(--p200));font-size:14px;font-weight:500;line-height:1.2;transition:filter .15s}
   .b2 .lnk:hover{filter:brightness(1.1)}
   .b2 .lnk .slot{width:22px;height:22px;font-size:20px}
@@ -287,7 +291,8 @@
   .b2 .banner.short .bt div{font-size:10px;line-height:12px}
   .b2 .bi{position:absolute;object-fit:contain;pointer-events:none}
   .b2 .bi.casino{right:4px;top:24px;height:90px}
-  .b2 .bi.box{right:4px;top:8px;height:79px}
+  /* "chest" e não "box": .box é a classe genérica de bloco (fundo, borda e padding) */
+  .b2 .bi.chest{right:4px;top:8px;height:79px}
   .b2 .bi.general{right:-20px;top:-28px;height:110px}
   .b2 .btns{display:flex;flex-direction:column;gap:4px;padding:4px 16px 8px}
   /* site: --t4-grad-dark muted-900 → --t4-grad-light muted-700, background-size 200% e desliza no hover (0.5s) */
@@ -585,7 +590,7 @@ Object.assign(THEMES, {
           { id: "dragon", label: "Fortune Dragon", icon: "custom:Fortune Dragon" },
           { id: "ape", label: "Wild Ape", icon: "custom:Wild Ape" },
         ]},
-        { title: "Caixa Misteriosa", sub: "Os jogos mais divertidos da internet estão aqui", img: `${T4}/box.png`, imgCls: "box", items: [
+        { title: "Caixa Misteriosa", sub: "Os jogos mais divertidos da internet estão aqui", img: `${T4}/box.png`, imgCls: "chest", items: [
           { id: "dinheiro", label: "Dinheiro", icon: "ph:money" },
           { id: "caixa-bonus", label: "Bônus", icon: "ph:gift" },
           { id: "fisicas", label: "Físicas", icon: "ph:package" },
@@ -651,7 +656,7 @@ function renderMenuT2() {
 }
 function renderMenuB2() {
   const m = THEMES.B2.menu;
-  const card = i => `<div class="card"${A(i)}><span class="t">${lab(i)}</span>${slot(i)}</div>`;
+  const card = i => `<div class="card"${A(i)}><div class="t"><span>${lab(i)}</span></div>${slot(i)}</div>`;
   const lnk = i => `<div class="lnk"${A(i)}>${slot(i)}<span>${lab(i)}</span></div>`;
   const btn = i => `<div class="btn"${A(i)}>${slot(i)}<span>${lab(i)}</span></div>`;
   const sm = i => `<div class="sm"${A(i)}>${slot(i)}<span>${lab(i)}</span></div>`;
