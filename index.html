@@ -827,7 +827,8 @@ function render() {
 const themeSel = document.getElementById("theme");
 themeSel.innerHTML = THEME_ORDER.filter(k => THEMES[k]).map(k => `<option value="${k}">${k}</option>`).join("");
 const libSel = document.getElementById("lib");
-libSel.innerHTML = Object.entries(LIBRARIES).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
+/* Bibliotecas do menu lateral ocultas do seletor (14/09/2026), junto com a aba; continuam em LIBRARIES. */
+libSel.innerHTML = Object.entries(LIBRARIES).filter(([k]) => !k.startsWith("menu-")).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
 const useDefaultLib = () => { state.lib = THEMES[state.theme].libs[state.area]; };
 themeSel.onchange = () => { state.theme = themeSel.value; useDefaultLib(); render(); };
 libSel.onchange = () => { state.lib = libSel.value; renderPalette(); };
