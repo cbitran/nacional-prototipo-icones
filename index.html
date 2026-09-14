@@ -801,7 +801,7 @@ function renderPalette() {
   document.getElementById("libTitle").textContent = lib.name;
   document.getElementById("libSrc").textContent = `Lumos Design System Engine · 01 — Foundations · ${lib.icons.length} ícones`;
   document.getElementById("grid").innerHTML = lib.icons.map(n =>
-    `<div class="chip" draggable="true" data-icon="${n}" title="${n}">${ICONS[n] || "?"}<span>${labelFor(state.lib, n) || `<i>sem nome</i><br>${n.split(":")[1]}`}</span></div>`).join("");
+    `<div class="chip" draggable="true" data-icon="${n}" title="${n}">${ICONS[n] || "?"}<span>${labelFor(state.lib, n) || n /* sem anotação "Item:" → nome real do Figma (nome do componente) */}</span></div>`).join("");
 }
 function render() {
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.area === state.area));
