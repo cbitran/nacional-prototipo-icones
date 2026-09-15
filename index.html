@@ -31,6 +31,8 @@
   .reset{margin-left:auto;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:8px 12px;cursor:pointer}
   .reset:hover{color:#fff;border-color:var(--muted)}
   .reset.armed{color:#fff;background:#b3261e;border-color:#b3261e}
+  .reset-ask{margin-left:auto;display:flex;align-items:center;gap:8px;color:#fff;font-size:13px}
+  .reset-ask .reset{margin-left:0}
 
   /* ---------- layout ---------- */
   .main{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;padding:24px 20px;align-items:start}
@@ -330,6 +332,7 @@
   <div class="field"><label for="brand">Cores (Brand)</label><select id="brand"></select></div>
   <div class="field"><label for="langSel">Idioma</label><select id="langSel"></select></div>
   <button class="reset" id="reset">Restaurar padrão deste tema</button>
+  <span class="reset-ask" id="resetAsk" hidden>Restaurar o <b id="resetTheme"></b> ao padrão do site? <button class="reset armed" id="resetYes">Restaurar</button><button class="reset" id="resetNo">Cancelar</button></span>
 </div>
 
 <div class="main">
@@ -707,7 +710,23 @@ function iconHTML(ref) {
   return ICONS[ref] || "";
 }
 /* troca salva: { icon, label? } (versões antigas salvavam só a string do ícone) */
-const swapOf = item => { const v = swaps[state.theme]?.[state.area]?.[item.id]; return typeof v === "string" ? { icon: v } : v || null; };
+/* Trocas salvas: o NOME exibido é sempre o nome atual da biblioteca (não o que foi salvo na hora da troca),
+   e endereços antigos são convertidos para o atual (Fluent: GitHub raw → CDN jsDelivr). (15/09/2026) */
+const OLD_REFS = [["img:https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/", "img:https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/"]];
+const fixRef = ic => OLD_REFS.reduce((r, [a, b]) => r.startsWith(a) ? b + r.slice(a.length) : r, ic || "");
+const currentLabel = ic => {
+  for (const k of [state.lib, THEMES[state.theme].libs.nav, ...Object.keys(LIBRARIES)]) {
+    const l = k && LIBRARIES[k] && LIBRARIES[k].icons.includes(ic) && labelFor(k, ic);
+    if (l) return l;
+  }
+  return THEMES[state.theme].nav.find(i => i.icon === ic)?.label;
+};
+const swapOf = item => {
+  const v = swaps[state.theme]?.[state.area]?.[item.id]; if (!v) return null;
+  const icon = fixRef(typeof v === "string" ? v : v.icon);
+  const label = currentLabel(icon) || (typeof v === "string" ? null : cleanLabel(v.label));
+  return label ? { icon, label } : { icon };
+};
 const lab = item => tr(swapOf(item)?.label || item.label);
 function slot(item) {
   const cur = swapOf(item);
@@ -853,7 +872,7 @@ const libSel = document.getElementById("lib");
 /* Bibliotecas do menu lateral ocultas do seletor (14/09/2026), junto com a aba; continuam em LIBRARIES. */
 libSel.innerHTML = Object.entries(LIBRARIES).filter(([k]) => !k.startsWith("menu-")).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
 const useDefaultLib = () => { state.lib = THEMES[state.theme].libs[state.area]; };
-themeSel.onchange = () => { state.theme = themeSel.value; useDefaultLib(); render(); };
+themeSel.onchange = () => { state.theme = themeSel.value; useDefaultLib(); closeReset(); render(); };
 libSel.onchange = () => { state.lib = libSel.value; renderPalette(); };
 const brandSel = document.getElementById("brand");
 brandSel.innerHTML = `<option value="">Cor do site (padrão do tema)</option>` + BRAND_MODES.map(m => `<option value="${m}">${m}</option>`).join("");
@@ -877,19 +896,12 @@ langSel.onchange = () => {
 
 /* confirmação no próprio botão: confirm() nativo é bloqueado em alguns navegadores embutidos e retorna false */
 const resetBtn = document.getElementById("reset");
-const RESET_LABEL = resetBtn.textContent;
-let resetTimer = null;
-const disarmReset = () => { clearTimeout(resetTimer); resetTimer = null; resetBtn.textContent = RESET_LABEL; resetBtn.classList.remove("armed"); };
-resetBtn.onclick = () => {
-  if (!resetTimer) {
-    resetBtn.textContent = `Clique de novo para restaurar o ${state.theme}`;
-    resetBtn.classList.add("armed");
-    resetTimer = setTimeout(disarmReset, 4000);
-    return;
-  }
-  disarmReset();
-  delete swaps[state.theme]; save(); render();
-};
+const resetAsk = document.getElementById("resetAsk");
+/* Restaurar: pede confirmação na própria barra (o confirm() do navegador é bloqueado no painel) e só fecha com Restaurar ou Cancelar */
+function closeReset() { resetAsk.hidden = true; resetBtn.hidden = false; }
+resetBtn.onclick = () => { document.getElementById("resetTheme").textContent = state.theme; resetBtn.hidden = true; resetAsk.hidden = false; };
+document.getElementById("resetNo").onclick = closeReset;
+document.getElementById("resetYes").onclick = () => { delete swaps[state.theme]; save(); closeReset(); render(); };
 
 /* ---------- drag and drop ---------- */
 const grid = document.getElementById("grid");
