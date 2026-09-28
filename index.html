@@ -324,7 +324,7 @@
   <div class="field"><label>Área</label>
     <div class="tabs" role="tablist">
       <button role="tab" data-area="nav" aria-selected="true">Navbar</button>
-      <button role="tab" data-area="menu" aria-selected="false">Menu lateral</button>
+      <button role="tab" data-area="menu" aria-selected="false">Sidebar</button>
     </div>
   </div>
   <div class="field"><label for="lib">Biblioteca de ícones</label><select id="lib"></select></div>
@@ -893,6 +893,7 @@ function renderPalette() {
 function render() {
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.area === state.area));
   document.getElementById("theme").value = state.theme;
+  renderLibraryOptions();
   document.getElementById("lib").value = state.lib;
   document.getElementById("brand").value = swaps[state.theme]?.brand || "";
   renderStage(); renderPalette();
@@ -902,10 +903,17 @@ function render() {
 const themeSel = document.getElementById("theme");
 themeSel.innerHTML = THEME_ORDER.filter(k => THEMES[k]).map(k => `<option value="${k}">${k}</option>`).join("");
 const libSel = document.getElementById("lib");
-/* O seletor de área permite alternar entre Navbar e Menu lateral; as bibliotecas do menu permanecem editáveis. */
-libSel.innerHTML = Object.entries(LIBRARIES)
-  .filter(([k]) => !["menu-sidebar", "menu-sidebar-t2"].includes(k))
-  .map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
+const LEGACY_MENU_LIBS = new Set(["menu-sidebar", "menu-sidebar-t2"]);
+const libraryEntriesForArea = () => Object.entries(LIBRARIES).filter(([key]) => {
+  if (state.area === "nav") return key.startsWith("nav-");
+  return key.startsWith("menu-") && !LEGACY_MENU_LIBS.has(key);
+});
+const renderLibraryOptions = () => {
+  const entries = libraryEntriesForArea();
+  libSel.innerHTML = entries.map(([key, value]) => `<option value="${key}">${value.name}</option>`).join("");
+  if (!entries.some(([key]) => key === state.lib)) state.lib = THEMES[state.theme].libs[state.area];
+  libSel.value = state.lib;
+};
 const useDefaultLib = () => { state.lib = THEMES[state.theme].libs[state.area]; };
 themeSel.onchange = () => { state.theme = themeSel.value; useDefaultLib(); closeReset(); render(); };
 libSel.onchange = () => { state.lib = libSel.value; renderPalette(); };
