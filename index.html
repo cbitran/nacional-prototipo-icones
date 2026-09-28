@@ -321,8 +321,7 @@
 <div class="top">
   <h1>Nacional · Troca de ícones</h1>
   <div class="field"><label for="theme">Tema</label><select id="theme"></select></div>
-  <!-- Menu lateral oculto a pedido do Celio (14/09/2026): não vai ser usado por enquanto. Para voltar, tirar o "hidden". -->
-  <div class="field" hidden><label>Área</label>
+  <div class="field"><label>Área</label>
     <div class="tabs" role="tablist">
       <button role="tab" data-area="nav" aria-selected="true">Navbar</button>
       <button role="tab" data-area="menu" aria-selected="false">Menu lateral</button>
@@ -869,8 +868,8 @@ function render() {
 const themeSel = document.getElementById("theme");
 themeSel.innerHTML = THEME_ORDER.filter(k => THEMES[k]).map(k => `<option value="${k}">${k}</option>`).join("");
 const libSel = document.getElementById("lib");
-/* Bibliotecas do menu lateral ocultas do seletor (14/09/2026), junto com a aba; continuam em LIBRARIES. */
-libSel.innerHTML = Object.entries(LIBRARIES).filter(([k]) => !k.startsWith("menu-")).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
+/* O seletor de área permite alternar entre Navbar e Menu lateral; as bibliotecas do menu permanecem editáveis. */
+libSel.innerHTML = Object.entries(LIBRARIES).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
 const useDefaultLib = () => { state.lib = THEMES[state.theme].libs[state.area]; };
 themeSel.onchange = () => { state.theme = themeSel.value; useDefaultLib(); closeReset(); render(); };
 libSel.onchange = () => { state.lib = libSel.value; renderPalette(); };
